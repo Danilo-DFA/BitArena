@@ -70,7 +70,7 @@ class GameScene extends Phaser.Scene {
         this.events.on('mobileInput', (data) => { this.mobileInput = data; });
 
         // Rede
-        this.socket = io();
+        this.socket = io('https://bitarena-game.onrender.com');
         this.otherPlayers = this.add.group();
         this.itemsGroup = this.add.group();
 
