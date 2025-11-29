@@ -6,7 +6,12 @@ const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+cors: {
+    origin: "*", // Libera para qualquer origem (Celular, PC, etc)
+     methods: ["GET", "POST"]
+     }
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
