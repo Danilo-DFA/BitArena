@@ -4,49 +4,45 @@ class MenuScene extends Phaser.Scene {
     }
 
     preload() {
-        // Carrega apenas o necessário para o menu (Background e Música)
+        // --- CARREGAMENTO DO PLUGIN (LOCAL) ---
+        // Carrega o arquivo que está na sua pasta assets/plugins
+        // O 'true' no final diz para iniciar o plugin imediatamente
+        this.load.plugin('rexVirtualJoystick', 'assets/plugins/rexvirtualjoystickplugin.min.js', true);
+
+        // Assets do Menu
         this.load.image('bg_menu', 'assets/maps/background.png'); 
         this.load.audio('bg_music', 'assets/audio/music.mp3');
     }
 
     create() {
-        console.log('[MenuScene] Tela de Login');
+        console.log('[MenuScene] Plugin Carregado e Pronto');
 
-        // 1. Background (Para não ficar tela preta)
+        // 1. Background
         const bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'bg_menu');
         bg.setOrigin(0.5, 0.5);
-        // Cobre a tela toda
-        const scale = Math.max(this.scale.width / bg.width, this.scale.height / bg.height);
-        bg.setScale(scale);
+        bg.setScale(Math.max(this.scale.width / bg.width, this.scale.height / bg.height));
 
-        // 2. Música (Já começa tocando aqui)
-        // Se já estiver tocando (de um reload), não reinicia
+        // 2. Música
         if (!this.sound.get('bg_music')) {
             this.bgMusic = this.sound.add('bg_music', { volume: 0.5, loop: true });
             if (!this.sound.locked) this.bgMusic.play();
             else this.sound.once(Phaser.Sound.Events.UNLOCKED, () => this.bgMusic.play());
         }
 
-        // 3. Mostra o HTML de Login
+        // 3. HTML de Login
         const loginDiv = document.getElementById('loginOverlay');
         const input = document.getElementById('nicknameInput');
         const btn = document.getElementById('playBtn');
 
-        loginDiv.style.display = 'block'; // Mostra a div
+        loginDiv.style.display = 'block';
         input.focus();
 
-        // 4. Lógica do Botão JOGAR
         btn.onclick = () => {
-            const name = input.value.trim() || 'Guerreiro'; // Garante um nome padrão
+            const name = input.value.trim() || 'Guerreiro';
             loginDiv.style.display = 'none';
             
             // Passa o objeto { nickname: name }
             this.scene.start('GameScene', { nickname: name });
-        };
-
-        // Permite apertar Enter também
-        input.onkeydown = (e) => {
-            if (e.key === 'Enter') btn.click();
         };
     }
 }

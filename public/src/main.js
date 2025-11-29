@@ -20,13 +20,6 @@ const config = {
         }
     },
 
-    plugins: {
-        global: [{
-            key: 'rexVirtualJoystick',
-            plugin: window.rexvirtualjoystickplugin, 
-            start: true
-        }]
-    },
 
     // A ORDEM IMPORTA: O Phaser inicia a primeira cena da lista
     scene: [MenuScene, GameScene, UIScene] 
