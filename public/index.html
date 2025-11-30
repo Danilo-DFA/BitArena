@@ -3,71 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BitArena - Multiplayer</title>
-    
+    <title>BitArena</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-
     <style>
-        body { 
-            margin: 0; padding: 0; background-color: #1a1a1a; 
-            overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh;
-            /* Aplica a fonte no corpo para forçar o navegador a carregar ela */
-            font-family: 'Press Start 2P', cursive; 
-        }
-        canvas {
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            touch-action: none; 
-        }
-
-        /* TELA DE LOGIN (Atualizada com a fonte nova) */
-        #loginOverlay {
-            display: none; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); text-align: center; z-index: 100;
-        }
-        .login-box {
-            background: rgba(0, 0, 0, 0.85); padding: 40px;
-            border-radius: 4px; border: 4px solid #00ff00; /* Borda mais grossa estilo pixel */
-            box-shadow: 0 0 20px #00ff00;
-            image-rendering: pixelated; /* Mantém bordas nítidas */
-        }
-        h1 {
-            color: #fff; margin: 0 0 30px 0; font-size: 30px; 
-            text-shadow: 4px 4px 0 #000; line-height: 1.5;
-        }
-        input {
-            padding: 15px; font-size: 16px; border: 2px solid #fff;
-            width: 250px; text-align: center; margin-bottom: 20px;
-            background: #000; color: #00ff00; outline: none;
-            font-family: 'Press Start 2P', cursive; /* Fonte no input */
-        }
-        button {
-            padding: 15px 30px; font-size: 16px; background-color: #00b9f2; color: white;
-            border: 4px solid #005f7f; cursor: pointer;
-            font-family: 'Press Start 2P', cursive; /* Fonte no botão */
-            box-shadow: 0 6px 0 #005f7f; transition: 0.1s;
-        }
-        button:hover { transform: translateY(-2px); }
-        button:active { transform: translateY(4px); box-shadow: 0 0 0; }
+        body { margin: 0; padding: 0; background-color: #1a1a1a; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Press Start 2P', cursive; }
+        canvas { touch-action: none; }
+        /* CSS do Login aqui... */
+        #loginOverlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 100; }
+        .login-box { background: rgba(0, 0, 0, 0.85); padding: 40px; border: 4px solid #00ff00; border-radius: 10px; }
+        input { padding: 10px; font-family: 'Press Start 2P'; }
+        button { padding: 10px; font-family: 'Press Start 2P'; cursor: pointer; }
     </style>
 </head>
 <body>
-
-    <div id="loginOverlay">
-        <div class="login-box">
-            <h1 style="color:#00ff00;">BIT ARENA</h1>
-            <input type="text" id="nicknameInput" placeholder="NICKNAME" maxlength="10" autocomplete="off">
-            <br>
-            <button id="playBtn">START</button>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-  <script src="assets/plugins/socket.io.js"></script>
+    
+    <script src="assets/plugins/socket.io.js"></script>
+
+    <script src="assets/plugins/rexvirtualjoystickplugin.min.js"></script>
 
     <script src="src/scenes/MenuScene.js"></script>
     <script src="src/scenes/UIScene.js"></script>
     <script src="src/scenes/GameScene.js"></script>
     <script src="src/main.js"></script>
 
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h1 style="color:#0f0; font-size: 20px; margin-bottom: 20px;">BIT ARENA</h1>
+            <input type="text" id="nicknameInput" placeholder="NICK">
+            <br><br>
+            <button id="playBtn">START</button>
+        </div>
+    </div>
 </body>
 </html>

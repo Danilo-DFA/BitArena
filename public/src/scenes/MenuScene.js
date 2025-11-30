@@ -4,10 +4,7 @@ class MenuScene extends Phaser.Scene {
     }
 
     preload() {
-        // --- CARREGAMENTO DO PLUGIN (LOCAL) ---
-        // Carrega o arquivo que está na sua pasta assets/plugins
-        // O 'true' no final diz para iniciar o plugin imediatamente
-        this.load.plugin('rexVirtualJoystick', 'assets/plugins/rexvirtualjoystickplugin.min.js', true);
+        console.log('[MenuScene] Carregando...');
 
         // Assets do Menu
         this.load.image('bg_menu', 'assets/maps/background.png'); 

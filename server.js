@@ -265,6 +265,7 @@ io.on('connection', (socket) => {
 });
 
 // --- GAME LOOP (FÍSICA 60 FPS) ---
+// --- GAME LOOP (FÍSICA 60 FPS) ---
 setInterval(() => {
     const playerIds = Object.keys(players);
     if (playerIds.length === 0) return;
@@ -273,50 +274,66 @@ setInterval(() => {
     playerIds.forEach((id) => {
         const p = players[id];
 
-        // 1. Morte
+        // 1. Morte (Prioridade Total - Morto não mexe)
         if (p.input.test_die && !p.isDead) handleDeath(p, null);
         if (p.isDead) {
             p.vy += GRAVITY; p.y += p.vy;
             if (p.y > 2000) { p.y = 2000; p.vy = 0; } 
-            return;
+            return; 
         }
 
-        // 2. Direção
+        // 2. Direção (Sempre atualiza, mesmo atacando)
         if (p.input.left) p.facingDirection = -1;
         if (p.input.right) p.facingDirection = 1;
 
-        // 3. Combate
+        // 3. Combate (Processa o hit, mas NÃO para o movimento)
         if (p.input.attack) processCombat(p, players);
 
-        // 4. Dash
+        // 4. Dash (Prioridade sobre movimento normal)
         if (p.input.dash && p.energy >= DASH_COST && !p.isDashing && now > p.lastDashTime + DASH_COOLDOWN) {
             p.isDashing = true; p.energy -= DASH_COST;
             p.dashEndTime = now + DASH_DURATION; p.lastDashTime = now;
             p.vx = DASH_SPEED * p.facingDirection; p.vy = 0;
         }
 
+        // 5. Movimento
         if (p.isDashing) {
+            // Se estiver no Dash, velocidade é fixa
             p.vx = DASH_SPEED * p.facingDirection; p.vy = 0;
             if (now > p.dashEndTime) { p.isDashing = false; p.vx = 0; }
-        } else {
-            // Movimento Normal
-            if (p.input.left) p.vx = -MOVE_SPEED;
-            else if (p.input.right) p.vx = MOVE_SPEED;
-            else p.vx = 0;
+        } 
+        else {
+            // --- MOVIMENTO NORMAL (CORRIGIDO PARA RUN & ATTACK) ---
+            // Aqui calculamos a velocidade independente se está atacando ou não.
+            
+            // Define velocidade baseada no input
+            if (p.input.left) {
+                p.vx = -MOVE_SPEED;
+            } else if (p.input.right) {
+                p.vx = MOVE_SPEED;
+            } else {
+                p.vx = 0;
+            }
 
-            // Fricção do Knockback
+            // (Opcional) Se quiser que ele ande mais devagar enquanto ataca, descomente abaixo:
+            // if (p.isAttacking) p.vx *= 0.5; 
+
+            // Fricção do Knockback (Se tomou dano, empurrão desacelera)
             if (now < p.lastDamageTime + 500 && Math.abs(p.vx) > MOVE_SPEED) {
                 p.vx *= 0.9; 
             }
 
+            // Pulo
             if (p.input.up && p.isGrounded) { p.vy = JUMP_FORCE; p.isGrounded = false; }
+            
+            // Gravidade
             p.vy += GRAVITY;
         }
 
-        // 5. Aplica Posição
+        // 6. Aplica Física
         p.x += p.vx; p.y += p.vy;
 
-        // 6. Colisão Plataforma
+        // 7. Colisão Plataforma
         p.isGrounded = false;
         if (p.vy >= 0) {
             const pFeet = p.y + 64;
@@ -328,20 +345,17 @@ setInterval(() => {
             }
         }
 
-        // 7. Itens
+        // 8. Itens e Buraco (Mantidos)
         mapItems.forEach(item => {
             if (item.active && checkRectCollision(p, item)) {
                 if (item.type === 'health') p.health = Math.min(p.health + 20, 100);
                 else if (item.type === 'energy') p.energy = Math.min(p.energy + 25, 100);
-                
                 item.active = false;
                 io.emit('currentItems', mapItems);
-                io.emit('itemCollected', p.playerId); // Som
+                io.emit('itemCollected', p.playerId);
                 setTimeout(() => { item.active = true; io.emit('currentItems', mapItems); }, ITEM_RESPAWN_TIME);
             }
         });
-
-        // 8. Buraco
         if (p.y > 1500) handleDeath(p, null);
     });
 
