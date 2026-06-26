@@ -1,0 +1,544 @@
+/* ==========================================================================
+   TEMA COPA 2026 - VERSÃO ULTRA COM CONTADOR DE BILHETES POR STATUS
+   ========================================================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #0b0e14;
+    color: #ffffff;
+    padding: 10px;
+    padding-bottom: 100px;
+}
+
+header {
+    text-align: center;
+    padding: 30px 10px;
+    background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #00ff88;
+    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.1);
+}
+
+header h1 {
+    font-size: 28px;
+    font-weight: 800;
+}
+
+header span {
+    color: #00ff88;
+}
+
+header p {
+    font-size: 14px;
+    color: #8b9bb4;
+    margin-top: 8px;
+}
+
+.auth-container {
+    text-align: center;
+    margin-bottom: 25px;
+    max-width: 600px;
+    margin: 0 auto 25px auto;
+}
+
+.btn-auth {
+    background-color: #00ff88;
+    color: #0b0e14;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 800;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.usuario-logado {
+    display: none;
+    color: #00ff88;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-auth-sair {
+    display: none;
+    background-color: #ff3366;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.abas-navegacao {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.aba-btn {
+    flex: 1;
+    background-color: #1a1f2e;
+    color: #8b9bb4;
+    border: 2px solid #2a3248;
+    padding: 12px 5px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s;
+}
+
+.aba-btn.ativa {
+    background-color: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
+    border-color: #00ff88;
+}
+
+.conteudo-aba {
+    display: none;
+}
+
+.conteudo-aba.ativo {
+    display: block;
+}
+
+#container-principal {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.loading {
+    text-align: center;
+    color: #8b9bb4;
+    font-weight: 600;
+    margin-top: 50px;
+}
+
+.jogo-card {
+    background-color: #1a1f2e;
+    border: 1px solid #2a3248;
+    border-radius: 16px;
+    padding: 20px 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.data-jogo {
+    text-align: center;
+    font-size: 12px;
+    color: #8b9bb4;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.titulo-confronto {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.titulo-confronto .vs {
+    color: #00ff88;
+    margin: 0 10px;
+    font-size: 18px;
+}
+
+.confronto-area {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.time-coluna {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 45%;
+}
+
+.bandeira {
+    width: 80px;
+    height: 55px;
+    object-fit: contain;
+}
+
+.bandeira-placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #2a3248;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #8b9bb4;
+    font-size: 24px;
+}
+
+.input-gol {
+    width: 60px;
+    height: 55px;
+    background-color: #0b0e14;
+    border: 2px solid #2a3248;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 800;
+    text-align: center;
+    outline: none;
+}
+
+.input-gol:focus {
+    border-color: #00ff88;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.input-gol:disabled {
+    background-color: #0d1117;
+    color: #00ff88;
+    border-color: #1a1f2e;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.btn-apostar {
+    width: 100%;
+    padding: 16px;
+    background-color: #00ff88;
+    color: #0b0e14;
+    font-size: 16px;
+    font-weight: 800;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(11, 14, 20, 0.9);
+    overflow-y: auto;
+}
+
+.modal-conteudo {
+    background-color: #1a1f2e;
+    margin: 10% auto;
+    padding: 25px;
+    border: 1px solid #2a3248;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.2);
+}
+
+.fechar-btn {
+    color: #8b9bb4;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.fechar-btn:hover {
+    color: #ffffff;
+}
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-auth {
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0;
+    background-color: #0b0e14;
+    border: 2px solid #2a3248;
+    border-radius: 8px;
+    color: white;
+    outline: none;
+    font-size: 16px;
+}
+
+.input-auth:focus {
+    border-color: #00ff88;
+}
+
+.btn-mostrar-senha {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0;
+    outline: none;
+}
+
+.msg-alerta {
+    margin-top: 15px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.rodape-auth {
+    margin-top: 10px;
+    text-align: left;
+}
+
+.link-discreto {
+    color: #8b9bb4;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.3s;
+}
+
+.link-discreto:hover {
+    color: #00ff88;
+}
+
+/* BARRA FLUTUANTE */
+.barra-flutuante {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 560px;
+    background: linear-gradient(135deg, #1a1f2e 0%, #111520 100%);
+    border: 2px solid #00ff88;
+    border-radius: 14px;
+    padding: 15px 20px;
+    box-shadow: 0 8px 32px rgba(0, 255, 136, 0.2);
+    z-index: 999;
+    animation: deslizarParaCima 0.4s ease-out;
+}
+
+.barra-conteudo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.info-barra {
+    display: flex;
+    flex-direction: column;
+}
+
+#contador-apostas {
+    font-weight: 600;
+    color: #8b9bb4;
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+#valor-barra-apostas {
+    font-weight: 800;
+    color: #00ff88;
+    font-size: 18px;
+}
+
+.btn-revisar {
+    background-color: #00ff88;
+    color: #0b0e14;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: transform 0.2s;
+}
+
+.btn-revisar:hover {
+    transform: scale(1.03);
+}
+
+/* LISTA DE RESUMO */
+.container-lista-resumo {
+    max-height: 250px;
+    overflow-y: auto;
+    margin: 20px 0;
+    padding-right: 5px;
+}
+
+.item-resumo {
+    display: flex;
+    justify-content: space-between;
+    background-color: #0b0e14;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 3px solid #00ff88;
+    font-size: 14px;
+}
+
+.item-resumo .placar-aposto {
+    color: #00ff88;
+    font-weight: 800;
+}
+
+.info-pagamento {
+    background-color: rgba(26, 31, 46, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.texto-verde {
+    color: #00ff88;
+    font-weight: bold;
+}
+
+.texto-neon {
+    color: #00ff88;
+    font-weight: 800;
+    font-size: 22px;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+/* LAYOUT DO PAINEL DE MINHAS APOSTAS */
+.card-minha-aposta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1a1f2e;
+    border: 1px solid #2a3248;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.detalhes-aposta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detalhes-aposta .confronto {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.detalhes-aposta .palpite {
+    font-size: 14px;
+    color: #8b9bb4;
+}
+
+.detalhes-aposta .palpite span {
+    color: #00ff88;
+    font-weight: bold;
+}
+
+.status-area {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.badge-status {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badge-status.pago {
+    background-color: rgba(0, 255, 136, 0.15);
+    color: #00ff88;
+    border: 1px solid #00ff88;
+}
+
+.badge-status.pendente {
+    background-color: rgba(255, 153, 0, 0.15);
+    color: #ff9900;
+    border: 1px solid #ff9900;
+}
+
+.btn-pagar-avulso {
+    background-color: #ff9900;
+    color: #0b0e14;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.btn-pagar-avulso:hover {
+    opacity: 0.9;
+}
+
+/* === NOVO ESTILO: Selo indicador de bilhetes adquiridos por jogo === */
+.selo-apostas-jogo {
+    background-color: #0b0e14;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 15px;
+    border: 1px dashed #2a3248;
+    color: #8b9bb4;
+}
+
+.selo-count-pago {
+    color: #00ff88;
+    font-weight: 800;
+}
+
+.selo-count-pendente {
+    color: #ff9900;
+    font-weight: 800;
+}
+
+@keyframes deslizarParaCima {
+    from {
+        bottom: -100px;
+        opacity: 0;
+    }
+
+    to {
+        bottom: 20px;
+        opacity: 1;
+    }
+}
