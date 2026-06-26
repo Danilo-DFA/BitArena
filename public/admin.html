@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cofre da Banca - Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
+        body { background-color: #0b0e14; color: #ffffff; padding: 20px; padding-bottom: 100px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .container-central { width: 100%; max-width: 600px; }
+        header { text-align: center; padding: 20px; background: linear-gradient(135deg, #2a1f0c 0%, #110d05 100%); border-radius: 12px; margin-bottom: 25px; border-bottom: 2px solid #ffd700; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.1); }
+        header h1 { font-size: 24px; font-weight: 800; color: #ffd700; text-transform: uppercase; }
+        header p { font-size: 13px; color: #8b9bb4; margin-top: 5px; }
+
+        #tela-login-admin { background-color: #1a1f2e; padding: 30px; border-radius: 12px; border: 1px solid #2a3248; text-align: center; }
+        .input-admin { width: 100%; padding: 12px; margin-bottom: 15px; background-color: #0b0e14; border: 1px solid #2a3248; color: white; border-radius: 8px; font-size: 14px; }
+        .btn-entrar-admin { width: 100%; padding: 12px; background-color: #ffd700; color: #0b0e14; border: none; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
+        #msg-erro-admin { color: #ff3366; font-size: 13px; margin-top: 10px; min-height: 15px; }
+
+        #painel-interno { display: none; }
+        .abas-admin { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn-aba { flex: 1; padding: 12px; background-color: #1a1f2e; color: #8b9bb4; border: 2px solid #2a3248; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 11px;}
+        .btn-aba.ativa { background-color: rgba(255, 215, 0, 0.15); color: #ffd700; border-color: #ffd700; }
+
+        .secao-conteudo { display: none; }
+        .secao-conteudo.ativa { display: block; }
+        .card-admin { background-color: #1a1f2e; border-left: 4px solid #ff3366; border-radius: 8px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .card-admin.ganhador { border-left-color: #00ff88; }
+        .info-card h4 { font-size: 16px; margin-bottom: 5px; color: #ffffff; }
+        .info-card p { font-size: 13px; color: #8b9bb4; margin-bottom: 3px; }
+        .info-card .destaque { color: #ffd700; font-weight: bold; }
+        .btn-aprovar { background-color: #00ff88; color: #0b0e14; border: none; padding: 10px 15px; border-radius: 6px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 12px; }
+        .btn-whatsapp { background-color: #25D366; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: 12px; text-decoration: none; display: inline-block; }
+        .loading { text-align: center; color: #ffd700; font-weight: bold; margin-top: 30px; }
+        .btn-sair-admin { background: transparent; color: #ff3366; border: 1px solid #ff3366; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 12px; font-weight: bold; }
+        
+        .label-config { display: block; text-align: left; font-size: 12px; color: #8b9bb4; margin-bottom: 5px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="container-central">
+        <header>
+            <h1>👑 Cofre da Banca</h1>
+            <p id="subtitulo-header">Área de Acesso Restrito</p>
+            <button id="btn-sair-admin" class="btn-sair-admin" style="display:none;">Travar Cofre e Sair</button>
+        </header>
+
+        <div id="tela-login-admin">
+            <h3 style="margin-bottom: 20px; color: #8b9bb4; font-size: 14px;">Identificação do Chefe</h3>
+            <input type="email" id="admin-email" class="input-admin" placeholder="E-mail de Administrador" required>
+            <input type="password" id="admin-senha" class="input-admin" placeholder="Senha do Sistema" required>
+            <button id="btn-entrar-admin" class="btn-entrar-admin">Destrancar Painel</button>
+            <p id="msg-erro-admin"></p>
+        </div>
+
+        <div id="painel-interno">
+            <div class="abas-admin">
+                <button id="btn-pendentes" class="btn-aba ativa">💰 Aprovar Pix</button>
+                <button id="btn-ganhadores" class="btn-aba">🏆 Ganhadores</button>
+                <button id="btn-config" class="btn-aba">⚙️ Configurações</button>
+            </div>
+
+            <div id="secao-pendentes" class="secao-conteudo ativa"><div id="lista-pendentes" class="loading">Buscando Pix Pendentes...</div></div>
+            <div id="secao-ganhadores" class="secao-conteudo"><div id="lista-ganhadores" class="loading">Calculando Ganhadores...</div></div>
+            
+            <div id="secao-config" class="secao-conteudo">
+                <div class="card-admin" style="display: block; border-left-color: #ffd700; padding: 25px;">
+                    <h4 style="margin-bottom: 20px; color: #ffd700; text-align: center; text-transform: uppercase;">Ajustes Gerais do Caixa</h4>
+                    
+                    <label class="label-config">💵 VALOR DE CADA PALPITE (R$):</label>
+                    <input type="number" id="input-valor-aposta" class="input-admin" step="0.50" min="1.00">
+                    
+                    <label class="label-config">🔑 CHAVE PIX DE RECEBIMENTO:</label>
+                    <input type="text" id="input-chave-pix" class="input-admin" placeholder="E-mail, Celular, CPF ou Chave Aleatória">
+                    
+                    <label class="label-config">👤 NOME COMPLETO DO TITULAR DA CONTA:</label>
+                    <input type="text" id="input-nome-titular" class="input-admin" placeholder="Ex: CARLOS DANILO SILVA">
+                    
+                    <label class="label-config">🏙️ CIDADE DA CONTA BANCÁRIA:</label>
+                    <input type="text" id="input-cidade-titular" class="input-admin" placeholder="Ex: GOIANIA">
+                    
+                    <button id="btn-salvar-valor" class="btn-entrar-admin" style="margin-top: 10px;">Gravar Parâmetros no Cofre</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let conexaoSupabaseAdmin;
+        let tokenUsuarioLogado = null; 
+
+        const telaLoginAdmin = document.getElementById('tela-login-admin');
+        const painelInterno = document.getElementById('painel-interno');
+        const btnSairAdmin = document.getElementById('btn-sair-admin');
+        const subtituloHeader = document.getElementById('subtitulo-header');
+        const msgErroAdmin = document.getElementById('msg-erro-admin');
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const configRes = await fetch('/api/config?t=' + Date.now());
+                const config = await configRes.json();
+                conexaoSupabaseAdmin = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+                const { data } = await conexaoSupabaseAdmin.auth.getSession();
+                if (data.session) processarLoginComSucesso(data.session);
+            } catch (err) { console.error(err); }
+        });
+
+        document.getElementById('btn-entrar-admin').addEventListener('click', async () => {
+            const email = document.getElementById('admin-email').value; const senha = document.getElementById('admin-senha').value;
+            msgErroAdmin.style.color = '#8b9bb4'; msgErroAdmin.textContent = "Verificando chaves de acesso...";
+            const { data, error } = await conexaoSupabaseAdmin.auth.signInWithPassword({ email: email, password: senha });
+            if (error) { msgErroAdmin.style.color = '#ff3366'; msgErroAdmin.textContent = "Acesso Negado."; } 
+            else { processarLoginComSucesso(data.session); }
+        });
+
+        btnSairAdmin.addEventListener('click', async () => {
+            await conexaoSupabaseAdmin.auth.signOut(); tokenUsuarioLogado = null; painelInterno.style.display = 'none'; btnSairAdmin.style.display = 'none'; telaLoginAdmin.style.display = 'block'; subtituloHeader.textContent = "Área de Acesso Restrito";
+        });
+
+        function processarLoginComSucesso(session) {
+            tokenUsuarioLogado = session.access_token; telaLoginAdmin.style.display = 'none'; painelInterno.style.display = 'block'; btnSairAdmin.style.display = 'inline-block';
+            subtituloHeader.textContent = `Operador: ${session.user.email}`; carregarPendentes(); carregarConfiguracoesAtuais();
+        }
+        
+        const fetchSeguro = async (url, options = {}) => {
+            if (!options.headers) options.headers = {};
+            options.headers['Authorization'] = `Bearer ${tokenUsuarioLogado}`;
+            const resposta = await fetch(url, options);
+            if (resposta.status === 403 || resposta.status === 401) { btnSairAdmin.click(); throw new Error("Negado"); }
+            return resposta.json();
+        };
+
+        const listaPendentes = document.getElementById('lista-pendentes');
+        const listaGanhadores = document.getElementById('lista-ganhadores');
+
+        async function carregarPendentes() {
+            listaPendentes.innerHTML = '<div class="loading">Buscando Pix Pendentes no servidor...</div>';
+            try {
+                const apostas = await fetchSeguro('/api/admin/apostas-pendentes');
+                if (apostas.length === 0) { listaPendentes.innerHTML = '<div class="loading" style="color: #8b9bb4;">Caixa limpo! ✅</div>'; return; }
+                listaPendentes.innerHTML = '';
+                apostas.forEach(aposta => {
+                    const div = document.createElement('div'); div.className = 'card-admin';
+                    div.innerHTML = `<div class="info-card"><h4>👤 ${aposta.nome}</h4><p>📱 ${aposta.telefone}</p><p>⚽ ${aposta.confronto} | Palpite: <span class="destaque">${aposta.palpite}</span></p></div><button class="btn-aprovar" onclick="aprovarPix('${aposta.id}')">Pix Recebido</button>`;
+                    listaPendentes.appendChild(div);
+                });
+            } catch (err) { listaPendentes.innerHTML = 'Erro.'; }
+        }
+
+        async function aprovarPix(id) {
+            if(!confirm("Confirma o recebimento?")) return;
+            try {
+                const resposta = await fetchSeguro('/api/admin/aprovar-pagamento', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aposta_id: id }) });
+                if(resposta.sucesso) { alert('✅ Bilhete Aprovado!'); carregarPendentes(); }
+            } catch (err) { console.error(err); }
+        }
+
+        async function carregarGanhadores() {
+            listaGanhadores.innerHTML = '<div class="loading">Procurando os sortudos...</div>';
+            try {
+                const ganhadores = await fetchSeguro('/api/admin/ganhadores');
+                if (ganhadores.length === 0) { listaGanhadores.innerHTML = '<div class="loading" style="color: #8b9bb4;">Nenhum ganhador ainda.</div>'; return; }
+                listaGanhadores.innerHTML = '';
+                ganhadores.forEach(ganhador => {
+                    const numWhats = ganhador.telefone.replace(/\D/g, ''); const msgWhats = encodeURIComponent(`Parabéns! Você cravou ${ganhador.palpite} no jogo ${ganhador.confronto}. Manda a chave Pix!`);
+                    const div = document.createElement('div'); div.className = 'card-admin ganhador';
+                    div.innerHTML = `<div class="info-card"><h4>🎯 ${ganhador.nome}</h4><p>⚽ ${ganhador.confronto}</p><p>Cravada: <span class="destaque" style="color: #00ff88;">${ganhador.palpite}</span></p></div><a href="https://wa.me/${numWhats}?text=${msgWhats}" target="_blank" class="btn-whatsapp">Pagar 📲</a>`;
+                    listaGanhadores.appendChild(div);
+                });
+            } catch (err) { listaGanhadores.innerHTML = 'Erro.'; }
+        }
+
+        async function carregarConfiguracoesAtuais() {
+            try {
+                const res = await fetch('/api/valor-aposta');
+                const data = await res.json();
+                document.getElementById('input-valor-aposta').value = data.valor_aposta;
+                document.getElementById('input-chave-pix').value = data.chave_pix || '';
+                document.getElementById('input-nome-titular').value = data.nome_titular || '';
+                document.getElementById('input-cidade-titular').value = data.cidade_titular || '';
+            } catch(e) { console.error(e); }
+        }
+
+        document.getElementById('btn-salvar-valor').addEventListener('click', async () => {
+            const v = document.getElementById('input-valor-aposta').value;
+            const c = document.getElementById('input-chave-pix').value;
+            const n = document.getElementById('input-nome-titular').value;
+            const ci = document.getElementById('input-cidade-titular').value;
+            
+            if(!v || !c || !n || !ci) return alert("Por favor, preencha todos os campos do formulário!");
+            
+            try {
+                const resposta = await fetchSeguro('/api/admin/valor-aposta', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ novo_valor: v, chave_pix: c, nome_titular: n, cidade_titular: ci })
+                });
+                if(resposta.sucesso) alert('✅ Todas as configurações da banca foram salvas e aplicadas!');
+            } catch(e) { alert("Erro ao salvar."); }
+        });
+
+        document.getElementById('btn-pendentes').addEventListener('click', (e) => { e.target.classList.add('ativa'); document.getElementById('btn-ganhadores').classList.remove('ativa'); document.getElementById('btn-config').classList.remove('ativa'); document.getElementById('secao-pendentes').classList.add('ativa'); document.getElementById('secao-ganhadores').classList.remove('ativa'); document.getElementById('secao-config').classList.remove('ativa'); carregarPendentes(); });
+        document.getElementById('btn-ganhadores').addEventListener('click', (e) => { e.target.classList.add('ativa'); document.getElementById('btn-pendentes').classList.remove('ativa'); document.getElementById('btn-config').classList.remove('ativa'); document.getElementById('secao-ganhadores').classList.add('ativa'); document.getElementById('secao-pendentes').classList.remove('ativa'); document.getElementById('secao-config').classList.remove('ativa'); carregarGanhadores(); });
+        document.getElementById('btn-config').addEventListener('click', (e) => { e.target.classList.add('ativa'); document.getElementById('btn-pendentes').classList.remove('ativa'); document.getElementById('btn-ganhadores').classList.remove('ativa'); document.getElementById('secao-config').classList.add('ativa'); document.getElementById('secao-pendentes').classList.remove('ativa'); document.getElementById('secao-ganhadores').classList.remove('ativa'); carregarConfiguracoesAtuais(); });
+    </script>
+</body>
+</html>
